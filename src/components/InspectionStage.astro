@@ -11,7 +11,7 @@ const items = [
 ];
 ---
 <section class="inspection" data-inspection aria-label="Интерактивная витрина продукции">
-  <div class="inspection__bar"><span class="mono"><i class="signal" aria-hidden="true"></i> Рабочая тема / образцы</span><span class="mono">↗</span></div>
+  <div class="inspection__bar"><span class="mono"><i class="signal" aria-hidden="true"></i> Коллекция защиты</span><span class="mono">↗</span></div>
   <div class="inspection__tabs" role="group" aria-label="Товар в витрине">
     {items.map((item, i) => <button type="button" data-sample={i} aria-pressed={i === 0}>{item.label}</button>)}
   </div>
@@ -22,6 +22,8 @@ const items = [
     <div class="inspection__rig">
       <div class="inspection__float">
         <div class="inspection__box">
+          <div class="inspection__edge" aria-hidden="true"></div>
+          <div class="inspection__edge inspection__edge--second" aria-hidden="true"></div>
           <div class="inspection__face inspection__face--back" aria-hidden="true"></div>
           <div class="inspection__face inspection__face--left" aria-hidden="true"></div>
           <div class="inspection__face inspection__face--right" aria-hidden="true"></div>
@@ -37,7 +39,7 @@ const items = [
         </div>
       </div>
     </div>
-    <span class="inspection__measure mono" aria-hidden="true">← ПОВЕРНИТЕ КАРТОЧКУ →</span>
+    <span class="inspection__measure mono" aria-hidden="true">Поверните, чтобы рассмотреть</span>
   </div>
   <div class="inspection__information" aria-live="polite">
     {items.map(({ product }, i) => <div data-sample-info={i} hidden={i !== 0}>
