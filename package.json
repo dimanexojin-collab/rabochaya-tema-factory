@@ -30,6 +30,6 @@
     "lighthouse": "^13.6.0",
     "node-html-parser": "^9.0.7",
     "subset-font": "^2.9.0",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   }
 }
