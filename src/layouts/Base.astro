@@ -8,7 +8,7 @@ import interLat from '../assets/fonts/inter-lat.woff2?url';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/components.css';
-import '../styles/motion.css';
+import '../styles/factory.css';
 import Seo from '../components/Seo.astro';
 import JsonLd from '../components/JsonLd.astro';
 import Header from '../components/Header.astro';
@@ -71,7 +71,7 @@ const csp = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 's
     {/* html.m — движение включено (нет reduced-motion); страховка: без motion.ts за 4 с класс снимается */}
     <script is:inline>(function(d){d.classList.add('js');if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;d.classList.add('m');setTimeout(function(){if(!window.__rt)d.classList.remove('m')},4000)})(document.documentElement)</script>
     <Seo title={title} description={description} canonical={canonical} noindex={noindex} ogImage={ogImage} ogImageAlt={ogImageAlt} ogType={ogType} />
-    <meta name="theme-color" content="#ebeadf" />
+    <meta name="theme-color" content="#101010" />
     <link rel="icon" href={url('/favicon.ico')} sizes="32x32" />
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
     <link rel="apple-touch-icon" href={url('/apple-touch-icon.png')} />

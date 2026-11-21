@@ -1,110 +1,66 @@
 ---
 import { Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import InspectionStage from '../components/InspectionStage.astro';
+import CategoryCarousel from '../components/CategoryCarousel.astro';
 import ProductGrid from '../components/ProductGrid.astro';
-import CategoryTile from '../components/CategoryTile.astro';
 import NewsCard from '../components/NewsCard.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { SITE } from '../config/site.ts';
-import { categories, categoryPath, productsOfCategory, minPrice, getProduct, hits, news, priceGroups } from '../data/catalog.ts';
+import { products, categories, hits, news, priceGroups } from '../data/catalog.ts';
 import { articles } from '../data/articles.ts';
-import { img, alt, WIDTHS } from '../lib/images.ts';
+import { img, alt } from '../lib/images.ts';
 import { url } from '../lib/paths.ts';
-import { productPrice, formatFrom } from '../lib/format.ts';
+import { formatFrom } from '../lib/format.ts';
 import { pickTitle, fitDescription, TAILS } from '../lib/seo.ts';
-
-const featured = getProduct('perchatki-pvh-10-klass-serye');
-// сетка в 4 колонки: берём кратное 4 число хитов (данные каталога не меняются)
-const hitPool = hits().filter((p) => p.slug !== featured.slug);
-const hitList = hitPool.slice(0, Math.max(4, Math.floor(Math.min(8, hitPool.length) / 4) * 4));
-// hero: слова в <span class="w"> для входа blur→sharp; пробелы остаются текстом
-const heroTitle = 'Рабочие перчатки и СИЗ — производство в Архангельске';
-const heroLead = `Вяжем трикотажные перчатки 7 и 10 класса с ПВХ и без — цех и офис находятся в Архангельске. Продаём оптом по счёту с НДС и в розницу в отделе «${SITE.retailName}».`;
-const words = (s: string) => s.split(' ').filter(Boolean);
-const leadStep = `${Math.max(2, Math.round(160 / Math.max(1, words(heroLead).length - 1)))}ms`;
-// ротатор: реальные категории каталога
-const rotNames = categories.map((c) => c.name);
+const hitList = hits().filter((p) => p.id !== 'perchatki-pvh-10-klass-serye').slice(0, 4);
 const minPvh = Math.min(...priceGroups.flatMap((g) => g.rows).map((r) => r.priceFrom ?? Infinity));
 const title = pickTitle('Рабочие перчатки с ПВХ от производителя в Архангельске');
-const description = fitDescription(
-  `Собственное производство рабочих перчаток х/б и с ПВХ 7 и 10 класса в Архангельске: оптом ${formatFrom(minPvh)} за пару с НДС, а также рукавицы, респираторы, беруши и сапоги.`,
-  ...TAILS,
-);
-const tileImage = (c: (typeof categories)[number]) => c.tile ?? c.image ?? productsOfCategory(c.slug)[0].image;
+const description = fitDescription(`Собственное производство рабочих перчаток х/б и с ПВХ 7 и 10 класса в Архангельске: оптом ${formatFrom(minPvh)} за пару с НДС, а также рукавицы, респираторы, беруши и сапоги.`, ...TAILS);
 ---
 <Base title={title} description={description}>
-  <section class="hero container" aria-labelledby="hero-title">
-    <div class="hero__media">
-      <Picture src={img('ceh')} alt={alt('ceh')} formats={['avif', 'webp']} widths={[...WIDTHS.large]} sizes="(min-width: 900px) 780px, 100vw" loading="eager" fetchpriority="high" decoding="async" />
-      <div class="hero__card">
-        <h1 id="hero-title">{words(heroTitle).map((w, i, a) => <Fragment><span class="w" style={`--i:${i}`}>{w}</span>{i < a.length - 1 && ' '}</Fragment>)}</h1>
-        <p class="hero__lead" style={`--st:${leadStep}`}>{words(heroLead).map((w, i, a) => <Fragment><span class="w" style={`--i:${i}`}>{w}</span>{i < a.length - 1 && ' '}</Fragment>)}</p>
-        <p class="hero__rot">
-          <span>В каталоге:</span>
-          <span class="rot" data-rot={rotNames.join('|')}><span class="rot__t" aria-hidden="true">{rotNames[0]}</span><span class="visually-hidden">{rotNames.join(', ')}</span></span>
-        </p>
-        <div class="btn-row">
-          <a class="btn" href={url('/optom/')} data-magnetic>Оптовый прайс</a>
-          <a class="btn btn--ghost" href={url('/katalog/')}>Каталог</a>
-        </div>
-      </div>
+  <section class="factory-hero container" aria-labelledby="hero-title">
+    <div class="factory-hero__intro">
+      <p class="mono eyebrow"><span class="signal" aria-hidden="true"></span> Производство / Архангельск</p>
+      <h1 id="hero-title">Работа<br />требует<br /><span>защиты.</span></h1>
+      <p class="factory-hero__lead">Рабочие перчатки собственного производства и средства индивидуальной защиты. Для предприятия. Для бригады. Для вашей работы.</p>
+      <div class="btn-row"><a class="btn btn--light" href={url('/katalog/')}>Подобрать защиту <span aria-hidden="true">↗</span></a><a class="btn btn--ghost" href={url('/optom/')}>Оптовый прайс</a></div>
+      <p class="factory-hero__location mono">Свой цех. Свой подход к качеству.</p>
     </div>
-    {/* без aria-label: имя ссылки = видимый текст карточки (label-content-name-mismatch) */}
-    <a class="featured" href={url(featured.path)}>
-      <span class="badge">Хит продаж</span>
-      <p class="featured__title">{featured.shortName}</p>
-      <div class="featured__img">
-        <Picture src={img(featured.image)} alt={featured.name} formats={['avif', 'webp']} widths={[240, 360, 480]} sizes="320px" loading="eager" decoding="async" style={`view-transition-name: p-${featured.slug}`} />
-      </div>
-      <div class="featured__foot">
-        <span class="featured__price price" data-price={featured.price}>{productPrice(featured)}</span>
-        <span class="btn">Подробнее</span>
-      </div>
-    </a>
+    <InspectionStage />
   </section>
 
-  <section class="section container" aria-labelledby="cats-title">
-    <h2 id="cats-title" data-reveal>Категории</h2>
-    <ul class="ribbon" role="list">
-      {categories.map((c) => (
-        <li><CategoryTile name={c.name} href={categoryPath(c)} imageId={tileImage(c)} count={productsOfCategory(c.slug).length} from={minPrice(productsOfCategory(c.slug))} /></li>
-      ))}
-    </ul>
+  <div class="factory-facts container" aria-label="О компании">
+    <div><span class="mono">Собственное производство</span><p>7 / 10 <small>класс вязки</small></p></div>
+    <div><span class="mono">Оптовые заказы</span><p>С НДС <small>по счёту</small></p></div>
+    <div><span class="mono">В каталоге</span><p>{products.length} <small>товаров / {categories.length} категорий</small></p></div>
+    <a href={url('/kontakty/')}><span class="mono">Офис и розничный отдел</span><p>Архангельск <span aria-hidden="true">↗</span></p><span class="factory-facts__address">{SITE.address.street}</span></a>
+  </div>
+
+  <section class="section container factory-categories" aria-labelledby="cats-title">
+    <div class="section-heading" data-reveal><div><p class="mono eyebrow">Каталог продукции</p><h2 id="cats-title">Защита под<br />вашу задачу.</h2></div><a class="text-link" href={url('/katalog/')}>Все товары <span aria-hidden="true">↗</span></a></div>
+    <CategoryCarousel />
   </section>
 
   <section class="section container" aria-labelledby="hits-title">
-    <h2 id="hits-title" data-reveal>Хиты продаж</h2>
+    <div class="section-heading" data-reveal><div><p class="mono eyebrow">Выбор покупателей</p><h2 id="hits-title">Проверено работой.</h2></div><a class="text-link" href={url('/katalog/')}>Открыть каталог ↗</a></div>
     <ProductGrid products={hitList} even />
-    <p><a href={url('/katalog/')}>Весь каталог</a></p>
   </section>
 
-  <section class="section container" aria-labelledby="prod-title">
-   <div class="scene">
-    <div class="scene__bg">
-      <Picture src={img('banner')} alt="" quality={55} formats={['avif', 'webp']} widths={[640, 768, 960, 1280, 1920]} sizes="(min-width: 1232px) 1200px, 100vw" loading="lazy" decoding="async" />
-    </div>
-    <div class="scene__card" data-reveal>
-      <h2 id="prod-title">Своё производство — честные цены</h2>
-      <p>Перчатки 7 и 10 класса вяжем из китайской, вьетнамской и индонезийской пряжи. Они недорогие, но надёжные — и это можно проверить, не выезжая из Архангельска: предприятие, офис и цех находятся здесь.</p>
-      <p>В прайсе по каждой позиции указан текс — сравнивать перчатки по весу пряжи честнее, чем по «ниткам». Под заказ вяжем другие размеры, плотность и цвета.</p>
-      <div class="btn-row">
-        <a class="btn" href={url('/proizvodstvo/')}>О производстве</a>
-        <a class="btn btn--ghost" href={url('/optom/')}>Прайс с тексами</a>
-      </div>
-      <ul class="contact-list" data-reveal>
-        {articles.map((a) => <li><a href={url(`/stati/${a.slug}/`)}>{a.title}</a></li>)}
-      </ul>
-    </div>
-   </div>
+  <section class="section container factory-production" aria-labelledby="prod-title">
+    <div class="factory-production__image" data-reveal><Picture src={img('ceh')} alt={alt('ceh')} formats={['avif', 'webp']} widths={[480, 720, 960]} sizes="(min-width: 900px) 560px, 100vw" loading="lazy" /><div class="mono">Производство / Архангельск</div></div>
+    <div class="factory-production__copy" data-reveal><p class="mono eyebrow"><span class="signal signal--green" aria-hidden="true"></span> Своё производство</p><h2 id="prod-title">От пряжи<br />до готовой пары.</h2><p>Вяжем трикотажные перчатки 7 и 10 класса с ПВХ и без покрытия. Цех, офис и розничный отдел — в Архангельске.</p><p>В прайсе указываем текс, чтобы вы могли сравнить плотность пряжи. Под заказ меняем размеры, плотность и цвета.</p><a class="btn btn--ghost" href={url('/proizvodstvo/')}>Как устроено производство ↗</a><div class="production-details"><span class="mono">7 / 10 класс</span><span class="mono">ПВХ / без покрытия</span></div></div>
+  </section>
+
+  <section class="section container" aria-labelledby="supply-title">
+    <div class="section-heading" data-reveal><div><p class="mono eyebrow">Работаем с вашим заказом</p><h2 id="supply-title">От задачи — к поставке.</h2></div></div>
+    <ol class="supply-steps"><li data-reveal><span class="mono">01 / Подбор</span><h3>Что нужно вашей команде?</h3><p>Выберите позиции в каталоге или расскажите о задаче. Поможем с выбором перчаток и СИЗ.</p></li><li data-reveal><span class="mono">02 / Расчёт</span><h3>Прайс и счёт с НДС.</h3><p>Уточним количество и подготовим счёт. Оптовые цены вынесены в отдельный прайс.</p></li><li data-reveal><span class="mono">03 / Согласование</span><h3>Договоримся о получении.</h3><p>Способ передачи заказа и условия доставки согласуем с вами при оформлении.</p></li></ol>
+    <div class="resource-links">{articles.slice(0,3).map((a) => <a href={url(`/stati/${a.slug}/`)}>{a.title}<span aria-hidden="true">↗</span></a>)}</div>
   </section>
 
   <section class="section container" aria-labelledby="news-title">
-    <h2 id="news-title" data-reveal>Новости и акции</h2>
-    <ul class="grid grid--3" role="list">
-      {news.slice(0, 3).map((n) => <li><NewsCard item={n} level={3} /></li>)}
-    </ul>
-    <p><a href={url('/novosti/')}>Все новости</a></p>
+    <div class="section-heading" data-reveal><div><p class="mono eyebrow">Журнал компании</p><h2 id="news-title">Новости и продукция.</h2></div><a class="text-link" href={url('/novosti/')}>Все публикации ↗</a></div>
+    <ul class="grid grid--3" role="list">{news.slice(0,3).map((n) => <li><NewsCard item={n} level={3} /></li>)}</ul>
   </section>
-
   <CtaBand />
 </Base>

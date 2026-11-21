@@ -1,0 +1,99 @@
+---
+import { Picture } from 'astro:assets';
+import { getProduct } from '../data/catalog.ts';
+import { img } from '../lib/images.ts';
+import { url } from '../lib/paths.ts';
+import { productPrice, unitText } from '../lib/format.ts';
+const items = [
+  { product: getProduct('perchatki-pvh-10-klass-serye'), label: 'Перчатки' },
+  { product: getProduct('sapogi-arktika-uteplennye'), label: 'Обувь' },
+  { product: getProduct('ochki-uvex-ultravizhn'), label: 'Очки' },
+];
+---
+<section class="inspection" data-inspection aria-label="Интерактивная витрина продукции">
+  <div class="inspection__bar"><span class="mono"><i class="signal" aria-hidden="true"></i> Рабочая тема / образцы</span><span class="mono">↗</span></div>
+  <div class="inspection__tabs" role="group" aria-label="Товар в витрине">
+    {items.map((item, i) => <button type="button" data-sample={i} aria-pressed={i === 0}>{item.label}</button>)}
+  </div>
+  <div class="inspection__viewport" data-turntable tabindex="0" role="group" aria-label="Поворот витрины: перетащите горизонтально или используйте стрелки клавиатуры">
+    <div class="inspection__grid" aria-hidden="true"></div>
+    <div class="inspection__axis inspection__axis--x" aria-hidden="true"></div>
+    <span class="inspection__corner mono" aria-hidden="true">СИЗ / КАТАЛОГ</span>
+    <div class="inspection__rig">
+      <div class="inspection__float">
+        <div class="inspection__box">
+          <div class="inspection__face inspection__face--back" aria-hidden="true"></div>
+          <div class="inspection__face inspection__face--left" aria-hidden="true"></div>
+          <div class="inspection__face inspection__face--right" aria-hidden="true"></div>
+          <div class="inspection__face inspection__face--top" aria-hidden="true"></div>
+          <div class="inspection__face inspection__face--bottom" aria-hidden="true"></div>
+          <div class="inspection__face inspection__face--front">
+            <span class="inspection__registration" aria-hidden="true">+</span>
+            {items.map(({ product }, i) => <div class="inspection__sample" data-sample-image={i} hidden={i !== 0}>
+              <Picture src={img(product.image)} alt={product.name} formats={['avif', 'webp']} widths={[320, 480, 640]} sizes="(max-width: 767px) 240px, 310px" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />
+            </div>)}
+            <span class="inspection__serial mono" aria-hidden="true">РАБОЧАЯ ТЕМА — СИЗ</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span class="inspection__measure mono" aria-hidden="true">← ПОВЕРНИТЕ КАРТОЧКУ →</span>
+  </div>
+  <div class="inspection__information" aria-live="polite">
+    {items.map(({ product }, i) => <div data-sample-info={i} hidden={i !== 0}>
+      <p>{product.shortName}</p><div class="inspection__price"><span>{productPrice(product)} <small>/ {unitText(product).replace(/^за /, '')}</small></span><a href={url(product.path)}>Карточка товара <span aria-hidden="true">↗</span></a></div>
+    </div>)}
+  </div>
+  <div class="inspection__controls"><span class="mono">Потяните для поворота</span><button type="button" data-spin aria-pressed="true">Пауза <span aria-hidden="true">Ⅱ</span></button><button type="button" data-reset>Вид спереди</button></div>
+</section>
+
+<script>
+  const stage = document.querySelector<HTMLElement>('[data-inspection]');
+  if (stage) {
+    const viewport = stage.querySelector<HTMLElement>('[data-turntable]')!;
+    const toggle = stage.querySelector<HTMLButtonElement>('[data-spin]')!;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    let spinning = !reduced.matches, x = -8, y = -18;
+    let drag: { id: number; x: number; y: number; angleX: number; angleY: number; captured: boolean } | undefined;
+    const render = () => { stage.style.setProperty('--angle-x', `${x}deg`); stage.style.setProperty('--angle-y', `${y}deg`); };
+    const spin = () => { stage.classList.toggle('is-paused', !spinning); toggle.setAttribute('aria-pressed', String(spinning)); toggle.textContent = spinning ? 'Пауза Ⅱ' : 'Вращать ↻'; };
+    stage.querySelectorAll<HTMLButtonElement>('[data-sample]').forEach((button) => button.addEventListener('click', () => {
+      const sample = button.dataset.sample;
+      stage.querySelectorAll<HTMLElement>('[data-sample-image]').forEach((el) => { el.hidden = el.dataset.sampleImage !== sample; });
+      stage.querySelectorAll<HTMLElement>('[data-sample-info]').forEach((el) => { el.hidden = el.dataset.sampleInfo !== sample; });
+      stage.querySelectorAll('[data-sample]').forEach((el) => el.setAttribute('aria-pressed', String(el === button)));
+    }));
+    toggle.addEventListener('click', () => { stage.classList.remove('is-front'); spinning = !spinning; spin(); });
+    stage.querySelector('[data-reset]')?.addEventListener('click', () => { spinning = false; x = 0; y = 0; stage.classList.add('is-front'); spin(); render(); });
+    viewport.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0 || !event.isPrimary) return;
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, angleX: x, angleY: y, captured: false };
+    });
+    viewport.addEventListener('pointermove', (event) => {
+      if (!drag || drag.id !== event.pointerId) return;
+      const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
+      if (!drag.captured) {
+        if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) { drag = undefined; return; }
+        if (Math.abs(dx) < 8) return;
+        drag.captured = true; viewport.setPointerCapture(event.pointerId); spinning = false; spin();
+      }
+      y = Math.max(-38, Math.min(38, drag.angleY + dx * .16));
+      x = Math.max(-20, Math.min(20, drag.angleX - dy * .1));
+      render();
+    });
+    const release = (event: PointerEvent) => { if (viewport.hasPointerCapture(event.pointerId)) viewport.releasePointerCapture(event.pointerId); drag = undefined; };
+    viewport.addEventListener('pointerup', release); viewport.addEventListener('pointercancel', release);
+    viewport.addEventListener('dragstart', (event) => event.preventDefault());
+    viewport.addEventListener('keydown', (event) => {
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+      event.preventDefault(); spinning = false;
+      y = Math.max(-38, Math.min(38, y + (event.key === 'ArrowRight' ? 6 : event.key === 'ArrowLeft' ? -6 : 0)));
+      x = Math.max(-20, Math.min(20, x + (event.key === 'ArrowDown' ? 4 : event.key === 'ArrowUp' ? -4 : 0)));
+      spin(); render();
+    });
+    new IntersectionObserver(([entry]) => stage.classList.toggle('in-view', entry.isIntersecting)).observe(stage);
+    document.addEventListener('visibilitychange', () => stage.classList.toggle('tab-hidden', document.hidden));
+    reduced.addEventListener('change', () => { if (reduced.matches) { spinning = false; spin(); } });
+    spin(); render();
+  }
+</script>

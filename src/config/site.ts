@@ -7,13 +7,13 @@
  * в интерфейсе показываются как «уточняется» (компонент TodoNote).
  *
  * Адрес публикации: origin + base. Задаются переменными окружения при сборке:
- *   SITE (или SITE_ORIGIN) — https://<owner>.github.io;  BASE (или BASE_PATH) — /rabochaya-tema/
+ *   SITE (или SITE_ORIGIN) — https://<owner>.github.io;  BASE (или BASE_PATH) — /rabochaya-tema-factory/
  * При переезде на свой домен: BASE=/ и SITE=https://домен — код не меняется.
  */
 
 const env: Record<string, string | undefined> = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env ?? {};
 
-/** '/rabochaya-tema' | 'rabochaya-tema/' | '' → '/rabochaya-tema/' | '/' */
+/** '/rabochaya-tema' | 'rabochaya-tema/' | '' → '/rabochaya-tema-factory/' | '/' */
 export function normalizeBase(b: string | undefined): string {
   const s = (b ?? '').trim().replace(/^\/+|\/+$/g, '');
   return s ? `/${s}/` : '/';
@@ -23,7 +23,7 @@ export type DayCode = 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr' | 'Sa' | 'Su';
 
 export const SITE = {
   origin: (env.SITE ?? env.SITE_ORIGIN ?? 'https://dimanexojin-collab.github.io').replace(/\/+$/, ''),
-  base: normalizeBase(env.BASE ?? env.BASE_PATH ?? '/rabochaya-tema/'),
+  base: normalizeBase(env.BASE ?? env.BASE_PATH ?? '/rabochaya-tema-factory/'),
 
   name: 'Рабочая тема',
   /** Короткое описание для OG/JSON-LD — по фактам источника. */

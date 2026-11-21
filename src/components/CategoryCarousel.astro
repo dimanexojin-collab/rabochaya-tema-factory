@@ -1,0 +1,15 @@
+---
+import CategoryTile from './CategoryTile.astro';
+import { categories, categoryPath, productsOfCategory, minPrice } from '../data/catalog.ts';
+---
+<div class="category-carousel" data-carousel>
+  <ul class="category-strip" data-category-track id="category-track" tabindex="0" aria-label="Категории товаров">
+    {categories.map((c) => <li><CategoryTile name={c.name} href={categoryPath(c)} imageId={c.tile ?? c.image ?? productsOfCategory(c.slug)[0].image} count={productsOfCategory(c.slug).length} from={minPrice(productsOfCategory(c.slug))} /></li>)}
+  </ul>
+  <div class="category-controls" data-category-controls>
+    <button class="category-controls__arrow" type="button" data-category-prev aria-label="Предыдущие категории">←</button>
+    <div><label class="mono" for="category-position">Листайте категории</label><input id="category-position" data-category-position type="range" min="0" max="1000" step="1" value="0" aria-label="Прокрутить категории товаров" aria-controls="category-track" disabled /></div>
+    <button class="category-controls__arrow" type="button" data-category-next aria-label="Следующие категории">→</button>
+  </div>
+</div>
+<script>import '../scripts/categories.ts';</script>

@@ -1,12 +1,12 @@
 # Деплой сайта «Рабочая тема»
 
-Адрес: `https://<owner>.github.io/rabochaya-tema/` — проектный сайт GitHub Pages (корень аккаунта занят сайтом kontur).
+Адрес: `https://<owner>.github.io/rabochaya-tema-factory/` — проектный сайт GitHub Pages (корень аккаунта занят сайтом kontur).
 Адрес задаётся при сборке двумя переменными окружения (см. `src/config/site.ts`):
 
 | Переменная | Значение на GitHub Pages | Свой домен |
 |---|---|---|
 | `SITE` (или `SITE_ORIGIN`) | `https://<owner>.github.io` | `https://example.ru` |
-| `BASE` (или `BASE_PATH`) | `/rabochaya-tema/` | `/` |
+| `BASE` (или `BASE_PATH`) | `/rabochaya-tema-factory/` | `/` |
 
 Из них строятся все ссылки (`url()`), canonical, `og:url`/`og:image`, JSON-LD, sitemap, `robots.txt`, `site.webmanifest`.
 Код при смене адреса не меняется.
@@ -24,7 +24,7 @@ STRICT=1 npm run build      # перед боевым запуском: пада
 (контактный лист для приёмки), `npm run assets` (иконки/OG). Оригиналы от заказчика → `source/originals/{id}.jpg`.
 
 ## 2. Репозиторий и первый пуш
-1. Создать репозиторий **`rabochaya-tema`** (public).
+1. Создать репозиторий **`rabochaya-tema-factory`** (public).
 2. `git init && git add . && git commit -m "init" && git branch -M main && git remote add origin … && git push -u origin main`
    (`source/`, `PLAN.md`, `QUESTIONS.md` в git не попадают — см. `.gitignore`).
 3. Settings → Pages → Source: **GitHub Actions**. Workflow `.github/workflows/deploy.yml` соберёт и опубликует сайт.
@@ -33,12 +33,12 @@ STRICT=1 npm run build      # перед боевым запуском: пада
 
 ## 3. robots.txt и sitemap (важно для подкаталога)
 Роботы читают только `https://<owner>.github.io/robots.txt` — это файл **репозитория kontur**. Файл
-`/rabochaya-tema/robots.txt` поисковики игнорируют (он заработает после переезда на свой домен).
+`/rabochaya-tema-factory/robots.txt` поисковики игнорируют (он заработает после переезда на свой домен).
 1. В kontur, `src/pages/robots.txt.ts`, добавить строку (отдельный маленький коммит):
-   `Sitemap: https://<owner>.github.io/rabochaya-tema/sitemap-index.xml`
-   и не ставить `Disallow` на `/rabochaya-tema/`.
+   `Sitemap: https://<owner>.github.io/rabochaya-tema-factory/sitemap-index.xml`
+   и не ставить `Disallow` на `/rabochaya-tema-factory/`.
 2. Служебные страницы (политика, 404) закрыты `<meta name="robots" content="noindex, follow">` и исключены из sitemap.
-3. Google Search Console: добавить ресурс «Префикс URL» `https://<owner>.github.io/rabochaya-tema/`, отправить sitemap.
+3. Google Search Console: добавить ресурс «Префикс URL» `https://<owner>.github.io/rabochaya-tema-factory/`, отправить sitemap.
 4. Яндекс.Вебмастер подкаталог отдельным сайтом не принимает: sitemap добавляется в ресурс корневого хоста
    `https://<owner>.github.io/`.
 
@@ -54,5 +54,5 @@ STRICT=1 npm run build      # перед боевым запуском: пада
 
 ## 5. После деплоя
 - `npm run preview` + `npm run lighthouse` локально (цели: mobile perf ≥ 95, SEO 100, a11y ≥ 95, BP 100).
-- Проверить: `https://<owner>.github.io/rabochaya-tema/`, `/rabochaya-tema/sitemap-index.xml`, любую несуществующую
+- Проверить: `https://<owner>.github.io/rabochaya-tema-factory/`, `/rabochaya-tema-factory/sitemap-index.xml`, любую несуществующую
   страницу (должна открыться 404 с рабочими ссылками).

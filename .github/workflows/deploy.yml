@@ -20,10 +20,10 @@ jobs:
     permissions:
       contents: read
     env:
-      # Проектный сайт: https://<owner>.github.io/rabochaya-tema/ (корень аккаунта занят kontur).
+      # Проектный сайт: https://<owner>.github.io/rabochaya-tema-factory/ (корень аккаунта занят kontur).
       # При переезде на свой домен: SITE=https://домен, BASE=/ — код не меняется.
       SITE: https://${{ github.repository_owner }}.github.io
-      BASE: /rabochaya-tema/
+      BASE: /rabochaya-tema-factory/
     steps:
       # Версии закреплены по отпечатку коммита (защита от подмены метки). Обновляет Dependabot.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
